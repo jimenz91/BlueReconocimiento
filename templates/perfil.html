@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="container portfolio">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="heading">				
+                    <img src="https://image.ibb.co/cbCMvA/logo.png" />
+                </div>
+            </div>	
+        </div>
+        <div class="bio-info">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="bio-image">
+                                <img src="http://lorempixel.com/273/273/people/{{ empleado.nombre }}" alt="image" />
+                            </div>			
+                        </div>
+                    </div>
+									
+                </div>
+                <div class="col-md-6">
+                    <div class="bio-content">
+                        <h1>{{ empleado }}</h1>
+                        <form action="{% url 'perfil' empleado.id %}" method="POST">
+                            {% csrf_token %}
+                            {% for categoria in empleado.categorias.all %}
+                                <h5>{{ categoria }}</h5>
+                                <input type="text" name="{{ categoria }}" required minlength="0" maxlength="1" size="1">
+                            {% endfor %}
+                            <button type="submit" value="Send" class="btn btn-primary people-btn">Enviar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class"chart-space">
+                    <div style="width:40%">
+                        <canvas id="pick_radar"></canvas>
+                    </div>																	
+                </div>
+                {% for dimension,valor in menciones.items %}
+                    {{ dimension }}: {{ valor }}
+                {% endfor %}
+            </div>	
+        </div>
+    </div>
+
+{% endblock %}
