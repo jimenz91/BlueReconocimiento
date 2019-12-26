@@ -6,10 +6,10 @@
 				<div class="col-md-12">
 					<div class="media">
 						<a class="pull-left" href="#">
-							<img class="media-object dp img-circle" src="http://lorempixel.com/200/200/people/{{ empleado.nombre }}" style="width: 200px;height:200px;">
+							<img class="media-object dp img-circle" src="http://lorempixel.com/200/200/people/{{ empleado.first_name }}" style="width: 200px;height:200px;">
 						</a>
 						<div class="media-body col-md-12">
-							<h4 class="media-heading"><a href="{% url 'perfil' empleado.id %}">{{ empleado.nombre }} {{ empleado.apellido }} | {% for proy in empleado.proyecto.all %}{{ proy }}{% endfor %}<big> {{ empleado.promedio_puntuaciones }}</big></a></h4>
+							<h4 class="media-heading"><a href="{% url 'perfil' empleado.id %}">{{ empleado.first_name }} {{ empleado.last_name }} | {% for proy in empleado.proyecto.all %}{{ proy }}{% endfor %}<big> {{ empleado.promedio_puntuaciones }}</big></a></h4>
 							<hr style="margin:8px auto">
 							{% for categoria in empleado.categorias.all %}
 								<h4>{{ categoria }}</h4>

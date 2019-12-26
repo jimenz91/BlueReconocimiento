@@ -3,23 +3,11 @@
 {% block content %}
 <div class="login-page">
   <div class="form">
-    <form class="register-form" action="{% url 'registro' %}" method="POST">
+    <form class="login-form" action="{% url 'registro' %}" method="POST">
     {% csrf_token %}
-      <input type="text" placeholder="nombre" name="nombre_registro"/>
-      <input type="text" placeholder="apellido" name="apellido_registro"/>
-      <input type="email" placeholder="email" name="email_registro"/>
-      <input type="text" placeholder="usuario" name="usuario_registro"/>
-      <input type="password" placeholder="contraseña" name="contraseña_registro"/>
-      <input type="password" placeholder="contraseña2" name="contraseña_registro2"/>
-      <button>Crear</button>
-      <p class="message">¿Estás registrado? <a href="#">Accede</a></p>
-    </form>
-    <form class="login-form" action="{% url 'dashboard' %}" method="POST">
-    {% csrf_token %}
-      <input type="email" placeholder="email" name="email_login"/>
-      <input type="password" placeholder="password" name="contraseña_login"/>
-      <button>Acceder</button>
-      <p class="message">¿No estás registrado? <a href="#">Crea una cuenta</a></p>
+      {{ form.as_p }}
+      <button name='registro_b'>Crear</button>
+      <p class="message">¿Estás registrado? <a href="{% url 'loginv' %}">Accede</a></p>
     </form>
   </div>
 </div>

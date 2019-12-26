@@ -7,7 +7,7 @@ from django.conf import settings
            
 class User(AbstractUser):
     menciones_hechas = models.IntegerField(default=4, editable=False)
-    promedio_puntuaciones = models.IntegerField(editable=False, default=0, blank=True)
+    promedio_puntuaciones = models.IntegerField(editable=False, default=0, blank=True, null=True)
     categorias = models.ManyToManyField('Categoria', blank=True)
     menciones = models.ManyToManyField('Mencion', blank=True, editable=False)
     proyecto = models.ManyToManyField('Proyecto', blank=True)

@@ -5,7 +5,9 @@ from django.contrib import messages, auth
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from mainApp.choices import categorias, puntuaciones
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+from .forms import FormularioRegistro
 
 User = get_user_model()
 
@@ -60,7 +62,7 @@ def promedios_totales():
 def index(request):
     promedios_totales()
 
-    empleados = User.objects.order_by('-promedio_puntuaciones').filter(activo=True)
+    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True).exclude(first_name='Admin')
 
     context = {
         'empleados': empleados,
@@ -68,31 +70,24 @@ def index(request):
 
     return render(request, 'index.html', context)
 
-def registro(request):
-
+def registro(request):    
     if request.method == "POST":
-        nombre = request.POST['nombre_registro']
-        apellido = request.POST['apellido_registro']
-        email = request.POST['email_registro']
-        contraseña = request.POST['contraseña_registro']
-        contraseña2 = request.POST['contraseña_registro2']
-        usuario = request.POST['usuario_registro']
+        form = FormularioRegistro(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = auth.authenticate(username=username, password=password)
+            login(request)
+                        
+            return redirect('dashboard')
 
-        # Se revisa si las contraseñas son idénticas.
-        if contraseña == contraseña2:
-            if User.objects.filter(email=email).exists():
-                print("Este correo ya está siendo usado.")
-            else:
-                # Se crea el nuevo usuario en la BBDD.
-                user = User.objects.create_user(username=usuario, email=email, first_name=nombre, last_name=apellido)
-                user.save()
-            return redirect('registro')
+        return render(request, 'dashboard')
 
-        else:
-            print("Las contraseñas no coinciden.")
-            return redirect('register')
-
-    return render(request, 'registro.html')
+    else:
+        form = FormularioRegistro()
+        args = {'form': form}
+        return render(request, 'registro.html', args)
 
 def perfil(request, pk):
     promedios_totales()
@@ -127,10 +122,29 @@ def perfil(request, pk):
 
     return render(request, 'perfil.html', context)
 
-def login(request):
-    return redirect(request, 'dashboard.html')
+def loginv(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username,password=password)
+            if user is not None:
+                login(request, user)
+                print("Login realizado correctamente.")
+                return redirect('dashboard')
+            else:
+                print("Usuario o contraseña incorrectos.")
+                return render(request, 'login.html')
 
-def logout(request):
+    form = AuthenticationForm()
+    args = {'form': form}
+    return render(request, 'login.html', args)
+    
+
+def logoutv(request):
+    logout(request)
+    print("Lougout successful.")
     return redirect('index')
 
 def dashboard(request):

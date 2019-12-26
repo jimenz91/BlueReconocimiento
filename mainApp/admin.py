@@ -5,18 +5,18 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'is_active', 'promedio_puntuaciones', 'get_proyectos')
+    list_display = ('id', 'first_name', 'last_name', 'username', 'is_active', 'promedio_puntuaciones', 'get_proyectos', 'get_categorias')
     list_editable = ('is_active',)
     list_display_links = ('id', 'first_name')
 
-    # def get_categorias(self, obj):
-    #     return "\n".join([c.nombre for c in obj.categorias.all()])
+    def get_categorias(self, obj):
+        return "\n".join([c.nombre for c in obj.categorias.all()])
 
     # def get_menciones(self, obj):
     #     return "\n".join([m.categoria for m in obj.menciones.all()])
 
     def get_proyectos(self, obj):
-        return "\n".join([p.first_name for p in obj.proyecto.all()])
+        return "\n".join([p.nombre for p in obj.proyecto.all()])
 
 class PuntuacionAdmin(admin.ModelAdmin):
     list_display = ('id', 'denominacion', 'valor')
