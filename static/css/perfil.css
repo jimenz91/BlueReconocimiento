@@ -44,11 +44,3 @@
 .bio-content p{
     font-weight:600;
 }
-
-/* Gráfico de radar */
-
-canvas{ 
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none; 
-} 

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from mainApp.models import Mencion, Categoria
-from django.db.models import Aggregate, Avg, Count
+from django.db.models import Aggregate, Avg, Count, F
 from django.contrib import messages, auth
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
@@ -107,10 +107,17 @@ def perfil(request, pk):
 
         if request.method == 'POST':
             if request.user.is_authenticated:
-                
-                crear_menciones(request, pk, empleado)
-
-                return redirect('perfil', pk)
+                if request.user.menciones_hechas > 0:
+                    crear_menciones(request, pk, empleado)
+                    usuario = User.objects.get(pk=request.user.id)
+                    usuario.menciones_hechas = F('menciones_hechas')-1
+                    usuario.save()
+                    print("Mención realizada correctamente.")
+                    
+                    return redirect('perfil', pk)
+                else:
+                    print("Imposible crear mención ya que has utilizado todas las de este mes.")
+                    return redirect('perfil', pk)
     
     else:
         if request.method == 'POST':
@@ -163,16 +170,12 @@ def dashboard(request):
     """
     View para mostrar la información del usuario logado.
     """
-
     promedios_totales()
-
+    # Se obtiene el objeto del usuario logado:
     usuario = request.user
-    print(usuario)
     menciones={}
-
+    # Se obtienen los promedios de las menciones por categoria del usuario.
     menciones = promedio_por_categorias(usuario, usuario.id, menciones)
-
-    print(menciones)
 
     context = {
         'menciones': menciones

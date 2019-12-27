@@ -5,9 +5,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'username', 'is_active', 'promedio_puntuaciones', 'get_proyectos', 'get_categorias')
+    list_display = ('id', 'username', 'is_active', 'promedio_puntuaciones', 'menciones_hechas', 'get_proyectos', 'get_categorias')
     list_editable = ('is_active',)
-    list_display_links = ('id', 'first_name')
+    list_display_links = ('id', 'username')
 
     def get_categorias(self, obj):
         return "\n".join([c.nombre for c in obj.categorias.all()])

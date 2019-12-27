@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="bio-content">
-                        <h1>{{ empleado }}</h1>
+                        <h2>{{ empleado }} | {% for p in empleado.proyecto.all %}{{ p }}{% endfor %}</h2>
                         <form action="{% url 'perfil' empleado.id %}" method="POST">
                             {% csrf_token %}
                             {% for categoria in empleado.categorias.all %}
@@ -38,10 +38,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class"chart-space">
-                    <div style="width:40%">
-                        <canvas id="pick_radar"></canvas>
-                    </div>																	
+                <div class"chart-space">																
                 </div>
                 {% for dimension,valor in menciones.items %}
                     {{ dimension }}: {{ valor }}
