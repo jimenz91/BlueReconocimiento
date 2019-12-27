@@ -8,6 +8,9 @@ from mainApp.choices import categorias, puntuaciones
 from django.contrib.auth import get_user_model, login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import FormularioRegistro
+import plotly.express as px
+from plotly.offline import plot
+import pandas as pd
 
 User = get_user_model()
 
@@ -126,11 +129,20 @@ def perfil(request, pk):
                 crear_menciones(request, pk, empleado)
 
                 return redirect('perfil', pk)
-            
-
+    
+    # Lógica de maquetación de gráfico de radar de usuarios.
+    categorias = list(menciones.keys())
+    promedios = list(menciones.values())
+    df = pd.DataFrame(dict(
+            r=promedios,
+            theta=categorias))
+    fig = px.line_polar(df, r='r', theta='theta', line_close=True)            
+    plot_div = plot(fig, output_type='div')
+    
     context = {
         'empleado': empleado,
         'menciones': menciones,
+        'plot_div': plot_div
     }
 
     return render(request, 'perfil.html', context)

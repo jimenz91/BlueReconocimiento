@@ -38,7 +38,10 @@
                 </div>
             </div>
             <div class="row">
-                <div class"chart-space">																
+                <div class"chart-space">
+                {% autoescape off %}
+                    {{ plot_div }}
+                {% endautoescape %}																
                 </div>
                 {% for dimension,valor in menciones.items %}
                     {{ dimension }}: {{ valor }}
