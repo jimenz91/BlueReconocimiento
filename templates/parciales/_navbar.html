@@ -16,7 +16,15 @@
   </div>
   
   <div class="nav-links">
-    <a href="{% url 'registro' %}" target="_blank">Registro</a>
-    <a href="{% url 'index' %}" target="_blank">Home</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'index' %}">Home</a>
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <a href="{% url 'dashboard' %}">{{ user.first_name }}</a>
+      <a href="{% url 'logoutv' %}">Logout</a>      
+    {% else %}
+      <a href="{% url 'index' %}">Home</a>
+      <a href="{% url 'registro' %}">Registro</a>
+      <a href="{% url 'loginv' %}">Login</a>
+    {% endif %}
   </div>
 </div>

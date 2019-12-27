@@ -70,7 +70,10 @@ def index(request):
 
     return render(request, 'index.html', context)
 
-def registro(request):    
+def registro(request):
+    """
+    View para registro de usuarios. Cuando un usuario se registra, se realiza el login automáticamente.
+    """
     if request.method == "POST":
         form = FormularioRegistro(request.POST)
         if form.is_valid():
@@ -90,6 +93,9 @@ def registro(request):
         return render(request, 'registro.html', args)
 
 def perfil(request, pk):
+    """
+    View para ver el perfil de otros usuarios, así como la asignación de menciones.
+    """
     promedios_totales()
 
     empleado = get_object_or_404(User, pk=pk)
@@ -123,6 +129,9 @@ def perfil(request, pk):
     return render(request, 'perfil.html', context)
 
 def loginv(request):
+    """
+    View con la lógica de login de usuarios.
+    """
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -143,9 +152,30 @@ def loginv(request):
     
 
 def logoutv(request):
+    """
+    View con la lógica de logout de usuarios.
+    """
     logout(request)
     print("Lougout successful.")
     return redirect('index')
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    """
+    View para mostrar la información del usuario logado.
+    """
+
+    promedios_totales()
+
+    usuario = request.user
+    print(usuario)
+    menciones={}
+
+    menciones = promedio_por_categorias(usuario, usuario.id, menciones)
+
+    print(menciones)
+
+    context = {
+        'menciones': menciones
+    }
+
+    return render(request, 'dashboard.html', context)
