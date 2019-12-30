@@ -77,6 +77,9 @@ def promedios_totales():
         i += 1
 
 def index(request):
+    """
+    Vista principal de la web, con el listado de los usuarios con mayor promedio de puntuaciones.
+    """
     promedios_totales()
 
     empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True).exclude(first_name='Admin')
@@ -121,6 +124,8 @@ def perfil(request, pk):
     compañeros = False
     proyectos_usuario = usuario.proyectos.all()
     proyectos_empleado = empleado.proyectos.all()
+
+    # Se comprueba si el empleado del perfil y el usuario logado son compañeros de proyecto.
     for pe in proyectos_empleado:
         for pu in proyectos_usuario:
             if pe == pu:
@@ -134,8 +139,11 @@ def perfil(request, pk):
 
         if request.method == 'POST':
             if request.user.is_authenticated:
+                # Se confirma que el empleado del perfil y el usuario logado sean compañeros de algún proyecto.
                 if compañeros == True:
+                    # Se revisa el número de menciones disponibles
                     if request.user.menciones_hechas > 0:
+                        #  Se crea la nueva mención, se le resta una 
                         crear_menciones(request, pk, empleado)
                         usuario.menciones_hechas = F('menciones_hechas')-1
                         usuario.save()
@@ -220,6 +228,7 @@ def dashboard(request):
 
     compañeros = []
 
+    # Se comparan los proyectos del usuario con los proyectos de cada uno de los empleados para determinar qué usuarios son sus compañeros y armar una lista con ellos.
     for pu in proyectos_usuario:
         for e in empleados:
             if pu in e.proyectos.all():
