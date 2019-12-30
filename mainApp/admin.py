@@ -16,7 +16,7 @@ class EmpleadoAdmin(admin.ModelAdmin):
     #     return "\n".join([m.categoria for m in obj.menciones.all()])
 
     def get_proyectos(self, obj):
-        return "\n".join([p.nombre for p in obj.proyecto.all()])
+        return "\n".join([p.nombre for p in obj.proyectos.all()])
 
 class PuntuacionAdmin(admin.ModelAdmin):
     list_display = ('id', 'denominacion', 'valor')

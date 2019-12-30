@@ -10,7 +10,7 @@ class User(AbstractUser):
     promedio_puntuaciones = models.IntegerField(editable=False, default=0, blank=True, null=True)
     categorias = models.ManyToManyField('Categoria', blank=True)
     menciones = models.ManyToManyField('Mencion', blank=True, editable=False)
-    proyecto = models.ManyToManyField('Proyecto', blank=True)
+    proyectos = models.ManyToManyField('Proyecto', blank=True)
     es_mvp_mes = models.BooleanField(default=False)
 
     def __str__(self):

@@ -20,20 +20,29 @@
                                 <img src="http://lorempixel.com/g/273/273/people/{{ empleado.first_name }}" alt="image" />
                             </div>			
                         </div>
-                    </div>
-									
+                    </div>		
                 </div>
                 <div class="col-md-6">
                     <div class="bio-content">
-                        <h2>{{ empleado }} | {% for p in empleado.proyecto.all %}{{ p }}{% endfor %}</h2>
-                        <form action="{% url 'perfil' empleado.id %}" method="POST">
-                            {% csrf_token %}
+                        <h2>{{ empleado }} | {% for p in empleado.proyectos.all %}{{ p }}{% endfor %}</h2>
+                        {% if empleado.id == user.id %}
                             {% for categoria in empleado.categorias.all %}
                                 <h5>{{ categoria }}</h5>
-                                <input type="text" name="{{ categoria }}" required minlength="0" maxlength="1" size="1">
                             {% endfor %}
-                            <button type="submit" value="Send" class="btn btn-primary people-btn">Enviar</button>
-                        </form>
+                        {% elif compañeros is False %}
+                            {% for categoria in empleado.categorias.all %}
+                                <h5>{{ categoria }}</h5>
+                            {% endfor %}
+                        {% else %}
+                            <form action="{% url 'perfil' empleado.id %}" method="POST">
+                                {% csrf_token %}
+                                {% for categoria in empleado.categorias.all %}
+                                    <h5>{{ categoria }}</h5>
+                                    <input type="text" name="{{ categoria }}" required minlength="0" maxlength="1" size="1">
+                                {% endfor %}
+                                <button type="submit" value="Send" class="btn btn-primary people-btn">Enviar</button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>

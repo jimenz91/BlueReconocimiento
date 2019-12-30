@@ -117,6 +117,16 @@ def perfil(request, pk):
 
     empleado = get_object_or_404(User, pk=pk)
     menciones = {}
+    usuario = User.objects.get(pk=request.user.id)
+    compañeros = False
+    proyectos_usuario = usuario.proyectos.all()
+    proyectos_empleado = empleado.proyectos.all()
+    for pe in proyectos_empleado:
+        for pu in proyectos_usuario:
+            if pe == pu:
+                compañeros = True
+            else:
+                compañeros = False
 
     if Mencion.objects.filter(receptor=pk):
 
@@ -124,18 +134,19 @@ def perfil(request, pk):
 
         if request.method == 'POST':
             if request.user.is_authenticated:
-                if request.user.menciones_hechas > 0:
-                    crear_menciones(request, pk, empleado)
-                    usuario = User.objects.get(pk=request.user.id)
-                    usuario.menciones_hechas = F('menciones_hechas')-1
-                    usuario.save()
-                    print("Mención realizada correctamente.")
-                    
-                    return redirect('perfil', pk)
+                if compañeros == True:
+                    if request.user.menciones_hechas > 0:
+                        crear_menciones(request, pk, empleado)
+                        usuario.menciones_hechas = F('menciones_hechas')-1
+                        usuario.save()
+                        print("Mención realizada correctamente.")
+                        
+                        return redirect('perfil', pk)
+                    else:
+                        print("Imposible crear mención ya que has utilizado todas las de este mes.")
+                        return redirect('perfil', pk)
                 else:
-                    print("Imposible crear mención ya que has utilizado todas las de este mes.")
-                    return redirect('perfil', pk)
-    
+                    print("No son compañeros.")
     else:
         if request.method == 'POST':
             if request.user.is_authenticated:
@@ -150,7 +161,8 @@ def perfil(request, pk):
     context = {
         'empleado': empleado,
         'menciones': menciones,
-        'plot_div': plot_div
+        'plot_div': plot_div,
+        'compañeros': compañeros
     }
 
     return render(request, 'perfil.html', context)
@@ -188,7 +200,7 @@ def logoutv(request):
 
 def dashboard(request):
     """
-    View para mostrar la información del usuario logado.
+    View para el dashboard del usuario logado.
     """
     promedios_totales()
     # Se obtiene el objeto del usuario logado:
@@ -200,9 +212,23 @@ def dashboard(request):
     # Se maqueta el radar del usuario.
     plot_div = grafico_radar(menciones)
 
+    # Se obtienen todos los empleados menos el usuario y el admin.
+    empleados = User.objects.exclude(pk__in=[usuario.id, 1])
+
+    # Se obtienen todos los proyectos del usuario logado.
+    proyectos_usuario = usuario.proyectos.all()
+
+    compañeros = []
+
+    for pu in proyectos_usuario:
+        for e in empleados:
+            if pu in e.proyectos.all():
+                compañeros.append(e)
+
     context = {
         'menciones': menciones,
-        'plot_div': plot_div
+        'plot_div': plot_div,
+        'compañeros': compañeros
     }
 
     return render(request, 'dashboard.html', context)
