@@ -14,6 +14,20 @@ import pandas as pd
 
 User = get_user_model()
 
+def grafico_radar(menciones):
+    """Método para graficar el promedio de mensiones de un usuario."""
+    
+    categorias = list(menciones.keys())
+    promedios = list(menciones.values())
+    
+    df = pd.DataFrame(dict(
+        r=promedios,
+        theta=categorias))
+    fig = px.line_polar(df, r='r', theta='theta', line_close=True, range_r=[0,100])     
+    plot_div = plot(fig, output_type='div', config={'displayModeBar': False})
+    
+    return plot_div
+
 def promedio_por_categorias(empleado, pk, menciones):
     """Método para calcular el promedio de las menciones recibidas por un usuario, dividido por categoría
     para mostrarlas en su gráfico de radar.
@@ -130,14 +144,8 @@ def perfil(request, pk):
 
                 return redirect('perfil', pk)
     
-    # Lógica de maquetación de gráfico de radar de usuarios.
-    categorias = list(menciones.keys())
-    promedios = list(menciones.values())
-    df = pd.DataFrame(dict(
-            r=promedios,
-            theta=categorias))
-    fig = px.line_polar(df, r='r', theta='theta', line_close=True)            
-    plot_div = plot(fig, output_type='div')
+    # Se maqueta el radar del usuario.
+    plot_div = grafico_radar(menciones)
     
     context = {
         'empleado': empleado,
@@ -189,8 +197,12 @@ def dashboard(request):
     # Se obtienen los promedios de las menciones por categoria del usuario.
     menciones = promedio_por_categorias(usuario, usuario.id, menciones)
 
+    # Se maqueta el radar del usuario.
+    plot_div = grafico_radar(menciones)
+
     context = {
-        'menciones': menciones
+        'menciones': menciones,
+        'plot_div': plot_div
     }
 
     return render(request, 'dashboard.html', context)
