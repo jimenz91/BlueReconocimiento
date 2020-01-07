@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="login-page">
+  {% include 'parciales/_alerts.html' %}
   <div class="form">
     <form class="login-form" action="{% url 'loginv' %}" method="POST">
     {% csrf_token %}

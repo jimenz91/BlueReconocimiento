@@ -82,7 +82,7 @@ def index(request):
     """
     promedios_totales()
 
-    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True).exclude(first_name='Admin')
+    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False).exclude(first_name='Admin')
 
     context = {
         'empleados': empleados,
@@ -98,24 +98,24 @@ def registro(request):
         form = FormularioRegistro(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = auth.authenticate(username=username, password=password)
-            login(request)
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Registro realizado correctamente y usuario logado automáticamente.')
                         
             return redirect('dashboard')
 
-        return render(request, 'dashboard')
+        return render(request, 'dashboard.html')
 
     else:
         form = FormularioRegistro()
-        args = {'form': form}
-        return render(request, 'registro.html', args)
+        context = {'form': form}
+        return render(request, 'registro.html', context)
 
 def perfil(request, pk):
     """
     View para ver el perfil de otros usuarios, así como la asignación de menciones.
     """
+
     promedios_totales()
 
     empleado = get_object_or_404(User, pk=pk)
@@ -132,12 +132,13 @@ def perfil(request, pk):
                 compañeros = True
             else:
                 compañeros = False
-
+    # Se revisa si el usuario ha recibido menciones.
     if Mencion.objects.filter(receptor=pk):
-
+        # Si ha recibido menciones, se calcula el promedio por categorías para maquetar el gráfico de radar.
         menciones = promedio_por_categorias(empleado, pk, menciones)
 
         if request.method == 'POST':
+            # Se revisa si el usuario está logado:
             if request.user.is_authenticated:
                 # Se confirma que el empleado del perfil y el usuario logado sean compañeros de algún proyecto.
                 if compañeros == True:
@@ -147,15 +148,18 @@ def perfil(request, pk):
                         crear_menciones(request, pk, empleado)
                         usuario.menciones_hechas = F('menciones_hechas')-1
                         usuario.save()
+                        messages.success(request, 'Mención realizada correctamente.')
                         print("Mención realizada correctamente.")
                         
                         return redirect('perfil', pk)
                     else:
+                        messages.error(request, 'Imposible crear mención ya que has utilizado todas las de este mes.')
                         print("Imposible crear mención ya que has utilizado todas las de este mes.")
                         return redirect('perfil', pk)
                 else:
                     print("No son compañeros.")
     else:
+        # Si el usuario no tiene menciones, no se hace nada.
         if request.method == 'POST':
             if request.user.is_authenticated:
                 
@@ -187,15 +191,21 @@ def loginv(request):
             user = authenticate(username=username,password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, "Login realizado correctamente.")
                 print("Login realizado correctamente.")
                 return redirect('dashboard')
             else:
+                messages.error(request, 'Usuario o contraseña incorrectos')
                 print("Usuario o contraseña incorrectos.")
-                return render(request, 'login.html')
+                return redirect('loginv')
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+            print("Usuario o contraseña incorrectos.")
+            return redirect('loginv')
 
     form = AuthenticationForm()
-    args = {'form': form}
-    return render(request, 'login.html', args)
+    context = {'form': form}
+    return render(request, 'login.html', context)
     
 
 def logoutv(request):
@@ -203,6 +213,7 @@ def logoutv(request):
     View con la lógica de logout de usuarios.
     """
     logout(request)
+    messages.success(request, 'Logout exitoso.')
     print("Lougout successful.")
     return redirect('index')
 
@@ -210,6 +221,7 @@ def dashboard(request):
     """
     View para el dashboard del usuario logado.
     """
+
     promedios_totales()
     # Se obtiene el objeto del usuario logado:
     usuario = request.user

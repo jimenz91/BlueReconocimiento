@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+	{% include 'parciales/_alerts.html' %}
     {% for empleado in empleados %}
-			<div class="row col-md-12 people">
+			<div class="people">
 				<div class="col-md-12">
 					<div class="media">
 						<a class="pull-left" href="#">
