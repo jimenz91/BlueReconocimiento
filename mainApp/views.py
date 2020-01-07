@@ -39,7 +39,8 @@ def promedio_por_categorias(empleado, pk, menciones):
         id_categoria = categoria.id
         promedio_cat = Mencion.objects.filter(receptor=pk, categoria=id_categoria).aggregate(Avg('puntuacion__valor'))
         menciones[categoria.nombre] = promedio_cat['puntuacion__valor__avg']
-        agregado = agregado + menciones[categoria.nombre]
+        if promedio_cat['puntuacion__valor__avg']:
+            agregado = agregado + menciones[categoria.nombre]
 
     return menciones
 
@@ -81,8 +82,8 @@ def index(request):
     Vista principal de la web, con el listado de los usuarios con mayor promedio de puntuaciones.
     """
     promedios_totales()
-
-    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False).exclude(first_name='Admin')
+    # Se muestran todos los empleados activos, con proyectos asignados y con menciones recibidas, ordenados de mayor a menor por el promedio.
+    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False, promedio_puntuaciones__isnull=False).exclude(first_name='Admin')
 
     context = {
         'empleados': empleados,

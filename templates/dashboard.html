@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="bio-content">
-                        <h1>¡Hola {{ user }}!</h1><h2>{% for proy in user.proyectos.all %}{{ proy }}{% endfor %} | {{ user.menciones_hechas }}</h2>
+                        <h1>¡Hola {{ user }}!</h1><h2>{% for proy in user.proyectos.all %}{{ proy }}{% endfor %} | Menciones disponibles: {{ user.menciones_hechas }}</h2>
                             {% for categoria in user.categorias.all %}
                                 <h5>{{ categoria }}</h5>
                             {% endfor %}
@@ -34,20 +34,28 @@
             </div>
             <div class="row">
                 <div class"chart-space col-md-12">
-                {% autoescape off %}
-                    {{ plot_div }}
-                {% endautoescape %}																
+                {% if menciones %}
+                    {% autoescape off %}
+                        {{ plot_div }}
+                    {% endautoescape %}
+                {% else %}
+                    <h1>Pendiente asignación de categorias.</h1>
+                {% endif %}																
                 </div>
             </div>
             <div class="row">
-                <h1>Compañeros de proyecto:</h1>
-                {% for c in compañeros %}
-                    <div class="media">
-                        <div class="media-body">
-                            <h2><a href="{% url 'perfil' c.id %}">{{ c.first_name }} {{ c.last_name }} | {% for p in c.proyectos.all %}{{ p }}{% endfor %}</a></h2>
+                {% if compañeros %}
+                    <h1>Compañeros de proyecto: </h1>
+                    {% for c in compañeros %}
+                        <div class="media">
+                            <div class="media-body">
+                                <br><h2><a href="{% url 'perfil' c.id %}">{{ c.first_name }} {{ c.last_name }} | {% for p in c.proyectos.all %}{{ p }}{% endfor %}</a></h2>
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                     <h1>Pendiente asignación de proyecto.</h1>
+                {% endif %}
             </div>	
         </div>
     </div>
