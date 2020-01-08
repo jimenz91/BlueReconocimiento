@@ -160,11 +160,9 @@ def perfil(request, pk):
                             usuario.save()
                             messages.success(request, 'Mención realizada correctamente.')
                             print("Mención realizada correctamente.")
-
                             return redirect('perfil', pk)
                     else:
                         messages.error(request, 'Imposible crear mención ya que has utilizado todas las de este mes.')
-                        print("Imposible crear mención ya que has utilizado todas las de este mes.")
                         return redirect('perfil', pk)
                 else:
                     print("No son compañeros.")
@@ -180,6 +178,9 @@ def perfil(request, pk):
                         usuario.menciones_hechas = F('menciones_hechas')-1
                         usuario.save()
                         messages.success(request, 'Mención realizada correctamente.')
+                        return redirect('perfil', pk)
+                    else:
+                        messages.error(request, 'No tienes menciones disponibles.')
                         return redirect('perfil', pk)
     
     # Se maqueta el radar del usuario.
