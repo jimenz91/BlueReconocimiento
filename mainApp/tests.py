@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse, resolve
-from .views import registro, loginv, logoutv, perfil, dashboard, index
+from .views import registro, loginv, logoutv, perfil, dashboard, index, empleados
 
 class TestUrls(TestCase):
 
@@ -27,3 +27,7 @@ class TestUrls(TestCase):
     def test_dashboard_url_resolves(self):
         url = reverse('dashboard')
         self.assertEqual(resolve(url).func, dashboard)
+
+    def test_empleados_url_resolves(self):
+        url = reverse('empleados')
+        self.assertEqual(resolve(url).func, empleados)

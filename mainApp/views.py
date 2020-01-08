@@ -1,17 +1,21 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from mainApp.models import Mencion, Categoria
-from django.db.models import Aggregate, Avg, Count, F
-from django.contrib import messages, auth
-from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
-from mainApp.choices import categorias, puntuaciones
-from django.contrib.auth import get_user_model, login, logout, authenticate
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import FormularioRegistro
-import plotly.express as px
-from plotly.offline import plot
-import pandas as pd
 import datetime as dt
+from urllib import request
+
+import pandas as pd
+import plotly.express as px
+from django.contrib import auth, messages
+from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.db.models import Aggregate, Avg, Count, F
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from plotly.offline import plot
+
+from mainApp.choices import categorias, puntuaciones
+from mainApp.models import Categoria, Mencion
+
+from .forms import FormularioRegistro
 
 User = get_user_model()
 today = dt.datetime.now()
@@ -85,7 +89,7 @@ def index(request):
     """
     promedios_totales()
     # Se muestran todos los empleados activos, con proyectos asignados y con menciones recibidas, ordenados de mayor a menor por el promedio.
-    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False, promedio_puntuaciones__isnull=False).exclude(first_name='Admin')
+    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False, promedio_puntuaciones__isnull=False).exclude(first_name='Admin')[:10]
 
     context = {
         'empleados': empleados,
@@ -223,7 +227,6 @@ def loginv(request):
     context = {'form': form}
     return render(request, 'login.html', context)
     
-
 def logoutv(request):
     """
     View con la lógica de logout de usuarios.
@@ -268,3 +271,10 @@ def dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
+
+def empleados(request):
+    # Se obtiene al usuario logado
+    usuario = request.user
+
+    # Se obtienen todos los usuarios, menos el que está logado y el administrador.
+    empleados = User.objects.exclude(pk__in=[usuario.id, 1])

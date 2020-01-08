@@ -46,9 +46,9 @@
             <div class="row">
                 {% if compañeros %}
                     <h1>Compañeros de proyecto: </h1>
-                    <div class="media">
+                    <div class="media col-md-12">
                         {% for c in compañeros %}
-                            <div class="media-body">
+                            <div class="media-body col-md-3">
                                 <h2><a href="{% url 'perfil' c.id %}">{{ c.first_name }} {{ c.last_name }} | {% for p in c.proyectos.all %}{{ p }}{% endfor %}</a></h2>
                             </div>
                         {% endfor %}

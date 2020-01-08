@@ -1,24 +1,20 @@
+from mainApp.models import Categoria, Puntuacion
+from django.template.defaultfilters import lower, upper
 
-categorias = {
-    'Problem Solving Skills': 1,
-    'Tech Programming Skills': 2,
-    'Solution Design Skills': 3,
-    'Ideation & Change Skills': 4,
-    '/bluetab Values & Fellowship': 5,
-}
+n_categorias = Categoria.objects.all().values()
+n_puntuaciones = Puntuacion.objects.all().values()
 
-puntuaciones = {
-    'A': 1,
-    'B': 2,
-    'C': 3,
-    'D': 4,
-    'E': 5,
-    'N/A': 6,
-    'a': 1,
-    'b': 2,
-    'c': 3,
-    'd': 4,
-    'e': 5,
-    '': 6,
-    'n/a': 6
-}
+categorias = {}
+puntuaciones = {}
+
+for c in n_categorias:
+    categorias[c['nombre']] = c['id']
+
+
+for p in n_puntuaciones:
+    puntuacion = lower(p['denominacion'])
+    puntuaciones[puntuacion] = p['id']
+    puntuacion = upper(p['denominacion'])
+    puntuaciones[puntuacion] = p['id']
+
+puntuaciones[''] = 6
