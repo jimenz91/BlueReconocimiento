@@ -1,6 +1,5 @@
 import datetime as dt
 from urllib import request
-
 import pandas as pd
 import plotly.express as px
 from django.contrib import auth, messages
@@ -11,9 +10,9 @@ from django.db.models import Aggregate, Avg, Count, F
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from plotly.offline import plot
-
-from mainApp.choices import categorias, puntuaciones
+from mainApp.choices import categorias, puntuaciones, proyectos
 from mainApp.models import Categoria, Mencion
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import FormularioRegistro
 
@@ -279,4 +278,31 @@ def empleados(request):
     # Se obtienen todos los usuarios, menos el que está logado y el administrador.
     empleados = User.objects.exclude(pk__in=[usuario.id, 1])
 
-    return render(request, 'empleados.html')
+    # Nombre
+    if 'nombre' in request.GET:
+        nombre = request.GET['nombre']
+        if nombre:
+            empleados = empleados.filter(first_name__icontains=nombre)
+    
+    if 'apellido' in request.GET:
+        apellido = request.GET['apellido']
+        if apellido:
+            empleados = empleados.filter(last_name__icontains=apellido)
+    
+    if 'categorias' in request.GET:
+        categoria = request.GET['categoria']
+        if categoria:
+            empleados = empleados.filter(categorias__iexact=categoria)
+
+    if 'proyectos' in request.GET:
+        proyecto = request.Get['proyectos']
+        if proyecto:
+            empleados = empleados.filter(proyectos__iexact=proyecto)
+    context = {
+        'values': request.GET,
+        'proyectos': proyectos,
+        'categorias': categorias,
+        'empleados': empleados
+    }
+
+    return render(request, 'empleados.html', context)
