@@ -11,8 +11,10 @@ from .forms import FormularioRegistro
 import plotly.express as px
 from plotly.offline import plot
 import pandas as pd
+import datetime as dt
 
 User = get_user_model()
+today = dt.datetime.now()
 
 def grafico_radar(menciones):
     """Método para graficar el promedio de mensiones de un usuario."""
@@ -145,14 +147,21 @@ def perfil(request, pk):
                 if compañeros == True:
                     # Se revisa el número de menciones disponibles
                     if request.user.menciones_hechas > 0:
-                        #  Se crea la nueva mención, se le resta una 
-                        crear_menciones(request, pk, empleado)
-                        usuario.menciones_hechas = F('menciones_hechas')-1
-                        usuario.save()
-                        messages.success(request, 'Mención realizada correctamente.')
-                        print("Mención realizada correctamente.")
-                        
-                        return redirect('perfil', pk)
+                        # Se confirma si existen menciones hechas por el usuario en el mes en curso.
+                        if Mencion.objects.filter(receptor=pk, fecha_realización__month=today.month):
+                            print('Ya ha creado una mención para este usuario en este mes.')
+                            messages.error(request, 'Ya ha creado una mención para este usuario en este mes.')
+                            
+                            return redirect('perfil', pk)
+                        else:
+                            # Se crea la nueva mención, se le resta una a las menciones disponibles del usuario emisor.
+                            crear_menciones(request, pk, empleado)
+                            usuario.menciones_hechas = F('menciones_hechas')-1
+                            usuario.save()
+                            messages.success(request, 'Mención realizada correctamente.')
+                            print("Mención realizada correctamente.")
+
+                            return redirect('perfil', pk)
                     else:
                         messages.error(request, 'Imposible crear mención ya que has utilizado todas las de este mes.')
                         print("Imposible crear mención ya que has utilizado todas las de este mes.")
@@ -163,10 +172,15 @@ def perfil(request, pk):
         # Si el usuario no tiene menciones, no se hace nada.
         if request.method == 'POST':
             if request.user.is_authenticated:
-                
-                crear_menciones(request, pk, empleado)
-
-                return redirect('perfil', pk)
+                # Se confirma que el empleado del perfil y el usuario logado sean compañeros de algún proyecto.
+                if compañeros == True:
+                    # Se revisa el número de menciones disponibles
+                    if request.user.menciones_hechas > 0:
+                        crear_menciones(request, pk, empleado)
+                        usuario.menciones_hechas = F('menciones_hechas')-1
+                        usuario.save()
+                        messages.success(request, 'Mención realizada correctamente.')
+                        return redirect('perfil', pk)
     
     # Se maqueta el radar del usuario.
     plot_div = grafico_radar(menciones)

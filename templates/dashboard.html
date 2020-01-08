@@ -46,13 +46,13 @@
             <div class="row">
                 {% if compañeros %}
                     <h1>Compañeros de proyecto: </h1>
-                    {% for c in compañeros %}
-                        <div class="media">
+                    <div class="media">
+                        {% for c in compañeros %}
                             <div class="media-body">
-                                <br><h2><a href="{% url 'perfil' c.id %}">{{ c.first_name }} {{ c.last_name }} | {% for p in c.proyectos.all %}{{ p }}{% endfor %}</a></h2>
+                                <h2><a href="{% url 'perfil' c.id %}">{{ c.first_name }} {{ c.last_name }} | {% for p in c.proyectos.all %}{{ p }}{% endfor %}</a></h2>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 {% else %}
                      <h1>Pendiente asignación de proyecto.</h1>
                 {% endif %}

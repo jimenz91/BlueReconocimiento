@@ -50,9 +50,13 @@
             </div>
             <div class="row">
                 <div class"chart-space">
-                {% autoescape off %}
-                    {{ plot_div }}
-                {% endautoescape %}																
+                {% if menciones %}
+                    {% autoescape off %}
+                        {{ plot_div }}
+                    {% endautoescape %}
+                {% else %}
+                    <h1>Pendiente puntuación de categorias.</h1>
+                {% endif %}															
                 </div>
             </div>	
         </div>
