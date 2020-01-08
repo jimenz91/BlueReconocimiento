@@ -278,3 +278,5 @@ def empleados(request):
 
     # Se obtienen todos los usuarios, menos el que está logado y el administrador.
     empleados = User.objects.exclude(pk__in=[usuario.id, 1])
+
+    return render(request, 'empleados.html')
