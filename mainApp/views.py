@@ -230,7 +230,6 @@ def logoutv(request):
     """
     logout(request)
     messages.success(request, 'Logout exitoso.')
-    print("Lougout successful.")
     return redirect('index')
 
 def dashboard(request):
