@@ -278,7 +278,7 @@ def empleados(request):
     # Se obtienen todos los usuarios, menos el que está logado y el administrador.
     empleados = User.objects.exclude(pk__in=[usuario.id, 1])
 
-    # Nombre
+    # Se revisan los diferentes campos del formulario de búsqueda para realizar la query con los parámetros introducidos.
     if 'nombre' in request.GET:
         nombre = request.GET['nombre']
         if nombre:
@@ -290,14 +290,15 @@ def empleados(request):
             empleados = empleados.filter(last_name__icontains=apellido)
     
     if 'categorias' in request.GET:
-        categoria = request.GET['categoria']
+        categoria = request.GET['categorias']
         if categoria:
-            empleados = empleados.filter(categorias__iexact=categoria)
+            empleados = empleados.filter(categorias__nombre__in=[categoria])
 
     if 'proyectos' in request.GET:
-        proyecto = request.Get['proyectos']
+        proyecto = request.GET['proyectos']
         if proyecto:
-            empleados = empleados.filter(proyectos__iexact=proyecto)
+            empleados = empleados.filter(proyectos__nombre__in=[proyecto])
+
     context = {
         'values': request.GET,
         'proyectos': proyectos,
