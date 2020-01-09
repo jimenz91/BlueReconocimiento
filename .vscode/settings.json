@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\Bluetab\\.virtualenvs\\BlueRecog-ngvf0C5h\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\Users\\Bluetab\\.virtualenvs\\BlueRecog-ngvf0C5h\\Scripts\\python.exe",
+    "python.linting.enabled": true
 }

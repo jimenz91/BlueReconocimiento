@@ -1,5 +1,4 @@
 import datetime as dt
-from urllib import request
 import pandas as pd
 import plotly.express as px
 from django.contrib import auth, messages
@@ -7,51 +6,60 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.db.models import Aggregate, Avg, Count, F
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from plotly.offline import plot
 from mainApp.choices import categorias, puntuaciones, proyectos
-from mainApp.models import Categoria, Mencion
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from mainApp.models import Mencion
+# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import FormularioRegistro
 
 User = get_user_model()
 today = dt.datetime.now()
 
+
 def grafico_radar(menciones):
     """Método para graficar el promedio de mensiones de un usuario."""
-    
+
     categorias = list(menciones.keys())
     promedios = list(menciones.values())
-    
+
     df = pd.DataFrame(dict(
         r=promedios,
         theta=categorias))
-    fig = px.line_polar(df, r='r', theta='theta', line_close=True, range_r=[0,100])     
+    fig = px.line_polar(df, r='r', theta='theta', line_close=True,
+                        range_r=[0, 100]
+                        )
     plot_div = plot(fig, output_type='div', config={'displayModeBar': False})
-    
+
     return plot_div
 
+
 def promedio_por_categorias(empleado, pk, menciones):
-    """Método para calcular el promedio de las menciones recibidas por un usuario, dividido por categoría
-    para mostrarlas en su gráfico de radar.
+    """Método para calcular el promedio de las menciones recibidas por un
+    usuario, dividido por categoría para mostrarlas en su gráfico de radar.
     """
     agregado = 0
-    promedio_total = 0
-    # Se obtienen todas las categorías asignadas al usuario y se recorren una por una. Se crea una lista con todas las menciones y se devuelve la lista.
+    # Se obtienen todas las categorías asignadas al usuario y se recorren una
+    # por una. Se crea una lista con todas las menciones y se devuelve
+    # la lista.
     for categoria in empleado.categorias.all():
         id_categoria = categoria.id
-        promedio_cat = Mencion.objects.filter(receptor=pk, categoria=id_categoria).aggregate(Avg('puntuacion__valor'))
+        promedio_cat = Mencion.objects.filter(
+            receptor=pk,
+            categoria=id_categoria
+            ).aggregate(Avg('puntuacion__valor'))
         menciones[categoria.nombre] = promedio_cat['puntuacion__valor__avg']
         if promedio_cat['puntuacion__valor__avg']:
             agregado = agregado + menciones[categoria.nombre]
 
     return menciones
 
+
 def crear_menciones(request, pk, empleado):
     """
-    Método para crear menciones nuevas para los usuarios, recibiendo las puntuaciones que se quieren aceptar y el empleado receptor.
+    Método para crear menciones nuevas para los usuarios, recibiendo las
+    puntuaciones que se quieren aceptar y el empleado receptor.
     """
     user_id = request.user.id
     categorias_empleado = empleado.categorias.all()
@@ -62,33 +70,48 @@ def crear_menciones(request, pk, empleado):
         puntuacion = request.POST[campo.nombre]
         categoria = categorias[campo.nombre]
         puntuacion_id = puntuaciones[puntuacion]
-        mencion = Mencion(emisor_id=user_id, categoria_id=categoria, puntuacion_id=puntuacion_id, receptor_id=pk)
+        mencion = Mencion(emisor_id=user_id, categoria_id=categoria,
+                          puntuacion_id=puntuacion_id, receptor_id=pk
+                          )
         mencion.save()
         menciones_creadas.append(mencion)
 
     return menciones_creadas
 
+
 def promedios_totales():
     """
-    Método para calcular el promedio de todas las menciones de todos los usuarios y actualizar el campo de promedio.
+    Método para calcular el promedio de todas las menciones de todos
+    los usuarios y actualizar el campo de promedio.
     Permite la actualización del ranking para mostrarlo en el índice.
     """
     n_empleados = User.objects.count()
     i = 1
-    while (i<=n_empleados):
-        promedio_total = Mencion.objects.filter(receptor=i).aggregate(Avg('puntuacion__valor'))
+    while (i <= n_empleados):
+        promedio_total = Mencion.objects.filter(receptor=i).aggregate(Avg(
+            'puntuacion__valor'
+            ))
         empleado = get_object_or_404(User, pk=i)
-        empleado.promedio_puntuaciones = promedio_total['puntuacion__valor__avg']
+        empleado.promedio_puntuaciones = promedio_total[
+            'puntuacion__valor__avg'
+            ]
         empleado.save()
         i += 1
 
+
 def index(request):
     """
-    Vista principal de la web, con el listado de los usuarios con mayor promedio de puntuaciones.
+    Vista principal de la web, con el listado de los usuarios con mayor
+    promedio de puntuaciones.
     """
     promedios_totales()
-    # Se muestran todos los empleados activos, con proyectos asignados y con menciones recibidas, ordenados de mayor a menor por el promedio.
-    empleados = User.objects.order_by('-promedio_puntuaciones').filter(is_active=True, proyectos__isnull=False, promedio_puntuaciones__isnull=False).exclude(first_name='Admin')[:10]
+    # Se muestran todos los empleados activos, con proyectos asignados y con
+    # menciones recibidas, ordenados de mayor a menor por el promedio.
+    empleados = User.objects.order_by('-promedio_puntuaciones').filter(
+        is_active=True,
+        proyectos__isnull=False,
+        promedio_puntuaciones__isnull=False
+        ).exclude(first_name='Admin')[:10]
 
     context = {
         'empleados': empleados,
@@ -96,9 +119,11 @@ def index(request):
 
     return render(request, 'index.html', context)
 
+
 def registro(request):
     """
-    View para registro de usuarios. Cuando un usuario se registra, se realiza el login automáticamente.
+    View para registro de usuarios. Cuando un usuario se registra, se realiza
+    el login automáticamente.
     """
     if request.method == "POST":
         form = FormularioRegistro(request.POST)
@@ -106,8 +131,10 @@ def registro(request):
             form.save()
             user = form.save()
             login(request, user)
-            messages.success(request, 'Registro realizado correctamente y usuario logado automáticamente.')
-                        
+            messages.success(
+                request, 'Registro realizado correctamente y usuario logado.'
+                )
+
             return redirect('dashboard')
 
         return render(request, 'dashboard.html')
@@ -117,9 +144,11 @@ def registro(request):
         context = {'form': form}
         return render(request, 'registro.html', context)
 
+
 def perfil(request, pk):
     """
-    View para ver el perfil de otros usuarios, así como la asignación de menciones.
+    View para ver el perfil de otros usuarios, así como la asignación de
+    menciones.
     """
 
     promedios_totales()
@@ -131,7 +160,8 @@ def perfil(request, pk):
     proyectos_usuario = usuario.proyectos.all()
     proyectos_empleado = empleado.proyectos.all()
 
-    # Se comprueba si el empleado del perfil y el usuario logado son compañeros de proyecto.
+    # Se comprueba si el empleado del perfil y el usuario logado son compañeros
+    # de proyecto.
     for pe in proyectos_empleado:
         for pu in proyectos_usuario:
             if pe == pu:
@@ -140,32 +170,46 @@ def perfil(request, pk):
                 compañeros = False
     # Se revisa si el usuario ha recibido menciones.
     if Mencion.objects.filter(receptor=pk):
-        # Si ha recibido menciones, se calcula el promedio por categorías para maquetar el gráfico de radar.
+        # Si ha recibido menciones, se calcula el promedio por categorías para
+        # maquetar el gráfico de radar.
         menciones = promedio_por_categorias(empleado, pk, menciones)
 
         if request.method == 'POST':
             # Se revisa si el usuario está logado:
             if request.user.is_authenticated:
-                # Se confirma que el empleado del perfil y el usuario logado sean compañeros de algún proyecto.
-                if compañeros == True:
+                # Se confirma que el empleado del perfil y el usuario logado
+                # sean compañeros de algún proyecto.
+                if compañeros is True:
                     # Se revisa el número de menciones disponibles
                     if request.user.menciones_hechas > 0:
-                        # Se confirma si existen menciones hechas por el usuario en el mes en curso.
-                        if Mencion.objects.filter(receptor=pk, fecha_realización__month=today.month):
-                            print('Ya ha creado una mención para este usuario en este mes.')
-                            messages.error(request, 'Ya ha creado una mención para este usuario en este mes.')
-                            
+                        # Se confirma si existen menciones hechas por el
+                        # usuario en el mes en curso.
+                        if Mencion.objects.filter(
+                                receptor=pk,
+                                fecha_realización__month=today.month
+                                ):
+                            messages.error(
+                                request, 'Ya ha creado una mención \
+                                    para este usuario en este mes.'
+                                )
+
                             return redirect('perfil', pk)
                         else:
-                            # Se crea la nueva mención, se le resta una a las menciones disponibles del usuario emisor.
+                            # Se crea la nueva mención, se le resta una a las
+                            # menciones disponibles del usuario emisor.
                             crear_menciones(request, pk, empleado)
                             usuario.menciones_hechas = F('menciones_hechas')-1
                             usuario.save()
-                            messages.success(request, 'Mención realizada correctamente.')
+                            messages.success(
+                                request, 'Mención realizada correctamente.'
+                                )
                             print("Mención realizada correctamente.")
                             return redirect('perfil', pk)
                     else:
-                        messages.error(request, 'Imposible crear mención ya que has utilizado todas las de este mes.')
+                        messages.error(
+                            request, 'Imposible crear mención ya que has \
+                                utilizado todas las de este mes.'
+                            )
                         return redirect('perfil', pk)
                 else:
                     print("No son compañeros.")
@@ -173,22 +217,27 @@ def perfil(request, pk):
         # Si el usuario no tiene menciones, no se hace nada.
         if request.method == 'POST':
             if request.user.is_authenticated:
-                # Se confirma que el empleado del perfil y el usuario logado sean compañeros de algún proyecto.
-                if compañeros == True:
+                # Se confirma que el empleado del perfil y el usuario logado
+                # sean compañeros de algún proyecto.
+                if compañeros is True:
                     # Se revisa el número de menciones disponibles
                     if request.user.menciones_hechas > 0:
                         crear_menciones(request, pk, empleado)
                         usuario.menciones_hechas = F('menciones_hechas')-1
                         usuario.save()
-                        messages.success(request, 'Mención realizada correctamente.')
+                        messages.success(
+                            request, 'Mención realizada correctamente.'
+                            )
                         return redirect('perfil', pk)
                     else:
-                        messages.error(request, 'No tienes menciones disponibles.')
+                        messages.error(
+                            request, 'No tienes menciones disponibles.'
+                            )
                         return redirect('perfil', pk)
-    
+
     # Se maqueta el radar del usuario.
     plot_div = grafico_radar(menciones)
-    
+
     context = {
         'empleado': empleado,
         'menciones': menciones,
@@ -197,6 +246,7 @@ def perfil(request, pk):
     }
 
     return render(request, 'perfil.html', context)
+
 
 def loginv(request):
     """
@@ -207,7 +257,7 @@ def loginv(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username,password=password)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
                 messages.success(request, "Login realizado correctamente.")
@@ -225,7 +275,8 @@ def loginv(request):
     form = AuthenticationForm()
     context = {'form': form}
     return render(request, 'login.html', context)
-    
+
+
 def logoutv(request):
     """
     View con la lógica de logout de usuarios.
@@ -233,6 +284,7 @@ def logoutv(request):
     logout(request)
     messages.success(request, 'Logout exitoso.')
     return redirect('index')
+
 
 def dashboard(request):
     """
@@ -242,7 +294,7 @@ def dashboard(request):
     promedios_totales()
     # Se obtiene el objeto del usuario logado:
     usuario = request.user
-    menciones={}
+    menciones = {}
     # Se obtienen los promedios de las menciones por categoria del usuario.
     menciones = promedio_por_categorias(usuario, usuario.id, menciones)
 
@@ -257,7 +309,9 @@ def dashboard(request):
 
     compañeros = []
 
-    # Se comparan los proyectos del usuario con los proyectos de cada uno de los empleados para determinar qué usuarios son sus compañeros y armar una lista con ellos.
+    # Se comparan los proyectos del usuario con los proyectos de cada uno de
+    # los empleados para determinar qué usuarios son sus compañeros y armar
+    # una lista con ellos.
     for pu in proyectos_usuario:
         for e in empleados:
             if pu in e.proyectos.all():
@@ -271,24 +325,32 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
+
 def empleados(request):
+    """
+    View que contiene un listado con todos los empleados y permite filtrar por
+    nombre, apellido, categorías y proyectos.
+    """
+
     # Se obtiene al usuario logado
     usuario = request.user
 
-    # Se obtienen todos los usuarios, menos el que está logado y el administrador.
+    # Se obtienen todos los usuarios, menos el que está logado y
+    # el administrador.
     empleados = User.objects.exclude(pk__in=[usuario.id, 1])
 
-    # Se revisan los diferentes campos del formulario de búsqueda para realizar la query con los parámetros introducidos.
+    # Se revisan los diferentes campos del formulario de búsqueda para realizar
+    # la query con los parámetros introducidos.
     if 'nombre' in request.GET:
         nombre = request.GET['nombre']
         if nombre:
             empleados = empleados.filter(first_name__icontains=nombre)
-    
+
     if 'apellido' in request.GET:
         apellido = request.GET['apellido']
         if apellido:
             empleados = empleados.filter(last_name__icontains=apellido)
-    
+
     if 'categorias' in request.GET:
         categoria = request.GET['categorias']
         if categoria:
