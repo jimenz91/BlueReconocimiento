@@ -1,18 +1,17 @@
 import datetime as dt
-import pandas as pd
-import plotly.express as px
 from django.contrib import auth, messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.db.models import Aggregate, Avg, Count, F
 from django.shortcuts import get_object_or_404, redirect, render
-from plotly.offline import plot
 from mainApp.choices import categorias, puntuaciones, proyectos
 from mainApp.models import Mencion
-# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+import pandas as pd
+import plotly.express as px
+from plotly.offline import plot
 from .forms import FormularioRegistro
+# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 User = get_user_model()
 today = dt.datetime.now()
