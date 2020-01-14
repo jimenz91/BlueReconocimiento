@@ -60,19 +60,23 @@ def crear_menciones(request, pk, empleado):
     Método para crear menciones nuevas para los usuarios, recibiendo las
     puntuaciones que se quieren aceptar y el empleado receptor.
     """
+    # Obtengo la id del usuario y sus categorías
     user_id = request.user.id
     categorias_empleado = empleado.categorias.all()
 
     menciones_creadas = []
 
     for campo in categorias_empleado:
+        # Obtengo la puntuación del formulario.
         puntuacion = request.POST[campo.nombre]
         categoria = categorias[campo.nombre]
         puntuacion_id = puntuaciones[puntuacion]
+        # Se crea la nueva mención en la base de datos.
         mencion = Mencion(emisor_id=user_id, categoria_id=categoria,
                           puntuacion_id=puntuacion_id, receptor_id=pk
                           )
         mencion.save()
+        # Se llena la lista de nuevas menciones en cada iteración del bucle.
         menciones_creadas.append(mencion)
 
     return menciones_creadas
@@ -84,13 +88,18 @@ def promedios_totales():
     los usuarios y actualizar el campo de promedio.
     Permite la actualización del ranking para mostrarlo en el índice.
     """
+    # Obtengo el número total de empleados registrados.
     n_empleados = User.objects.count()
     i = 1
+    # Se realiza el bucle mientras por cada empleado registrado.
     while (i <= n_empleados):
+        # Se calcula el promedio de todas las menciones en la base de datos
+        # para cada usuario.
         promedio_total = Mencion.objects.filter(receptor=i).aggregate(Avg(
             'puntuacion__valor'
             ))
         empleado = get_object_or_404(User, pk=i)
+        # Se actualiza el promedio del usuario en la BBDD.
         empleado.promedio_puntuaciones = promedio_total[
             'puntuacion__valor__avg'
             ]
