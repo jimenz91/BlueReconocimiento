@@ -29,3 +29,5 @@ puntuaciones[''] = 6
 
 for p in n_proyectos:
     proyectos[p['nombre']] = p['id']
+
+variablle_id = 0
