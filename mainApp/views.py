@@ -163,19 +163,20 @@ def perfil(request, pk):
 
     empleado = get_object_or_404(User, pk=pk)
     menciones = {}
-    usuario = User.objects.get(pk=request.user.id)
     compañeros = False
-    proyectos_usuario = usuario.proyectos.all()
-    proyectos_empleado = empleado.proyectos.all()
+    if request.user.is_authenticated:
+        usuario = User.objects.get(pk=request.user.id)
+        proyectos_usuario = usuario.proyectos.all()
+        proyectos_empleado = empleado.proyectos.all()
 
-    # Se comprueba si el empleado del perfil y el usuario logado son compañeros
-    # de proyecto.
-    for pe in proyectos_empleado:
-        for pu in proyectos_usuario:
-            if pe == pu:
-                compañeros = True
-            else:
-                compañeros = False
+        # Se comprueba si el empleado del perfil y el usuario logado son compañeros
+        # de proyecto.
+        for pe in proyectos_empleado:
+            for pu in proyectos_usuario:
+                if pe == pu:
+                    compañeros = True
+                else:
+                    compañeros = False
     # Se revisa si el usuario ha recibido menciones.
     if Mencion.objects.filter(receptor=pk):
         # Si ha recibido menciones, se calcula el promedio por categorías para
